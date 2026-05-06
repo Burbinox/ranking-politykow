@@ -7,48 +7,144 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-content">
-      <h1>Ranking Polityków</h1>
-      <p class="subtitle">Oceń i porównaj polskich polityków</p>
-      <a href="#ranking" class="btn-primary">Zobacz ranking</a>
-    </div>
+
+  <header>
+    <h1>Ranking Polityków</h1>
   </header>
 
-  <main>
-    <section id="ranking" class="section">
-      <div class="container">
-        <h2>Top politycy</h2>
-        <p class="section-desc">Strona w budowie — wkrótce pełny ranking.</p>
-        <div class="placeholder-cards">
-          <div class="card placeholder">
-            <div class="rank">#1</div>
-            <div class="card-info">
-              <div class="avatar-placeholder"></div>
-              <div class="name-placeholder"></div>
-            </div>
-          </div>
-          <div class="card placeholder">
-            <div class="rank">#2</div>
-            <div class="card-info">
-              <div class="avatar-placeholder"></div>
-              <div class="name-placeholder"></div>
-            </div>
-          </div>
-          <div class="card placeholder">
-            <div class="rank">#3</div>
-            <div class="card-info">
-              <div class="avatar-placeholder"></div>
-              <div class="name-placeholder"></div>
-            </div>
-          </div>
-        </div>
+  <main class="container">
+
+    <div class="tier tier--green">
+      <div class="tier-label">
+        <span class="tier-icon">✔</span>
+        Warty głosu
       </div>
-    </section>
+      <div class="tier-body" id="warty_glosu"></div>
+    </div>
+
+    <div class="tier tier--gray">
+      <div class="tier-label">
+        <span class="tier-icon">–</span>
+        Neutralny
+      </div>
+      <div class="tier-body" id="neutralny"></div>
+    </div>
+
+    <div class="tier tier--red-light">
+      <div class="tier-label">
+        <span class="tier-icon">✗</span>
+        Nie głosować
+      </div>
+      <div class="tier-body" id="nie_glosowac"></div>
+    </div>
+
+    <div class="tier tier--red-dark">
+      <div class="tier-label">
+        <span class="tier-icon">☠</span>
+        Usunąć z życia publicznego
+      </div>
+      <div class="tier-body" id="usunac"></div>
+    </div>
+
   </main>
 
   <footer>
     <p>© 2026 Ranking Polityków</p>
   </footer>
+
+  <!-- Modal -->
+  <div id="modal" class="modal-overlay" hidden>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="modal-name"></h2>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-content" id="modal-content"></div>
+    </div>
+  </div>
+
+  <script>
+    const modal        = document.getElementById('modal');
+    const modalName    = document.getElementById('modal-name');
+    const modalContent = document.getElementById('modal-content');
+    const modalClose   = document.getElementById('modal-close');
+
+    function openModal(politician) {
+      modalName.textContent = politician.name;
+      modalContent.innerHTML = '';
+
+      const items = politician.evidence || [];
+      if (items.length === 0) {
+        modalContent.innerHTML = '<p class="no-evidence">Brak dowodów.</p>';
+      } else {
+        items.forEach(item => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'evidence-item';
+
+          const badge = document.createElement('span');
+          badge.className = `evidence-badge evidence-badge--${item.type}`;
+          badge.textContent = item.type === 'positive' ? '✔ Pozytywny' : '✗ Negatywny';
+          wrapper.appendChild(badge);
+
+          const ext = item.file.split('.').pop().toLowerCase();
+          if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
+            const img = document.createElement('img');
+            img.src = item.file;
+            img.alt = politician.name;
+            wrapper.appendChild(img);
+          } else if (ext === 'txt') {
+            fetch(item.file)
+              .then(r => r.text())
+              .then(text => {
+                const pre = document.createElement('pre');
+                pre.className = 'evidence-quote';
+                pre.textContent = text;
+                wrapper.appendChild(pre);
+              });
+          }
+
+          modalContent.appendChild(wrapper);
+        });
+      }
+
+      modal.hidden = false;
+    }
+
+    function closeModal() {
+      modal.hidden = true;
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    fetch('politicians.json')
+      .then(res => res.json())
+      .then(politicians => {
+        const categories = ['warty_glosu', 'neutralny', 'nie_glosowac', 'usunac'];
+        categories.forEach(cat => {
+          const container = document.getElementById(cat);
+          const inCat = politicians.filter(p => p.category === cat);
+
+          inCat.forEach((politician, i) => {
+            const span = document.createElement('span');
+            span.textContent = politician.name;
+
+            if (politician.evidence && politician.evidence.length > 0) {
+              span.className = 'politician has-evidence';
+              span.addEventListener('click', () => openModal(politician));
+            } else {
+              span.className = 'politician';
+            }
+
+            container.appendChild(span);
+            if (i < inCat.length - 1) {
+              container.appendChild(document.createTextNode(', '));
+            }
+          });
+        });
+      });
+  </script>
+
 </body>
 </html>

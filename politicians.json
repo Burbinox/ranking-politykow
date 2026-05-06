@@ -1,0 +1,9 @@
+[
+  {
+    "name": "Marta Cienkowska",
+    "category": "usunac",
+    "evidence": [
+      { "file": "static/marta_cienkowska/marta_cienkowska.png", "type": "negative" }
+    ]
+  }
+]
