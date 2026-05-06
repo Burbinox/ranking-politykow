@@ -3,7 +3,7 @@
     "name": "Marta Cienkowska",
     "category": "usunac",
     "evidence": [
-      { "file": "static/marta_cienkowska/marta_cienkowska.png", "type": "negative" }
+      { "file": "static/marta_cienkowska/marta_cienkowska.png", "type": "negative", "comment": "Podniesienie cen elektroniki przez Panią minister Martę Cienkowską" }
     ]
   }
 ]

@@ -86,6 +86,13 @@
           badge.textContent = item.type === 'positive' ? '✔ Pozytywny' : '✗ Negatywny';
           wrapper.appendChild(badge);
 
+          if (item.comment) {
+            const comment = document.createElement('div');
+            comment.className = 'evidence-comment';
+            comment.innerHTML = `<span class="evidence-comment__label">💬 Komentarz</span><p>${item.comment}</p>`;
+            wrapper.appendChild(comment);
+          }
+
           const ext = item.file.split('.').pop().toLowerCase();
           if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
             const img = document.createElement('img');
